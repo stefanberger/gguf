@@ -594,3 +594,24 @@ jobs:
       target_collection_private: ${{ needs.environment-setup.outputs.target_repo_private == 'true' }}
     secrets:
       hf_token: ${{ secrets.HF_TOKEN_TEST }}
+
+  embedding-sign-models-in-repos:
+    needs: [ environment-setup, embedding-quantize-upload-gguf ]
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        repo_id: ${{ fromJson(needs.environment-setup.outputs.source_embedding_repos) }}
+    uses: ./.github/workflows/reusable-sign-model-in-hf-repo.yml
+    with:
+      debug: true
+      do_token_exchange: false
+      repo_id: ${{ matrix.repo_id }}
+      target_repo_owner: ${{ needs.environment-setup.outputs.target_repo_owner }}
+      target_repo_suffix: "-GGUF"
+    secrets:
+      hf_token: ${{ secrets.HF_TOKEN_TEST }}
+      sigstore_sts_client_secret: ${{ secrets.SIGSTORE_STS_CLIENT_SECRET }}
