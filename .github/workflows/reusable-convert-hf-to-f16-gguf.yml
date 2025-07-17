@@ -205,12 +205,14 @@ jobs:
         python ./scripts/hf_model_upload.py $TARGET_REPO_ID $FNAME_F16_GGUF ${{secrets.hf_token}} ${{github.workflow_ref}} ${{github.run_id}}
 
     - name: Debug
+      if: ${{ false }}
       run: |
         ls -al
         pwd
         find .github
 
     - name: sign-model
+      if: ${{ false }}
       uses: ./.github/workflows/reusable-sign-models
       with:
         debug: true
@@ -218,6 +220,7 @@ jobs:
         sigstore_sts_client_secret: ${{secrets.sigstore_sts_client_secret}}
 
     - name: upload-model-sig-to-target-repo
+      if: ${{ false }}
       run: |
         echo "FNAME_F16_GGUF='$FNAME_F16_GGUF' (${{ env.FNAME_F16_GGUF}})"
         echo "TARGET_REPO_ID='$TARGET_REPO_ID'(${{ env.TARGET_REPO_ID}})"
