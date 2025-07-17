@@ -1,0 +1,101 @@
+name: sign-models-reusable
+
+inputs:
+  model_dir:
+    type: string
+    required: true
+  do_token_exchange:
+    type: boolean
+    required: false
+    default: false
+  debug:
+    type: boolean
+    required: false
+    default: false
+  sigstore_sts_client_secret:
+    type: string
+    required: true
+
+defaults:
+  run:
+    shell: bash
+
+runs:
+  using: "composite"
+  steps:
+
+  - name: Dump GitHub inputs
+    shell: bash
+    env:
+      GITHUB_INPUTS: ${{ toJson(inputs) }}
+    if: ${{ github.event.inputs.debug }}
+    run: echo "$GITHUB_INPUTS"
+
+  - name: List all environment variables
+    shell: bash
+    if: ${{ github.event.inputs.debug }}
+    run: env | sort
+
+  - name: debug-dynamic-environment
+    shell: bash
+    if: inputs.debug == true
+    run: |
+      echo "MODEL_DOWNLOAD_DIR (env)=$MODEL_DOWNLOAD_DIR (${{ env.MODEL_DOWNLOAD_DIR }})"
+
+  - name: Install dependencies
+    shell: bash
+    run: |
+      pip install model_signing
+
+  - name: Get github OIDC token and maybe run token exchange
+    shell: bash
+    id: get-oidc-token
+    env:
+      SIGSTORE_STS_CLIENT_SECRET: ${{ inputs.sigstore_sts_client_secret }}
+    run: |
+      identity_token=$(
+        curl -H \
+          "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+          "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sigstore" \
+        | jq -r .value
+      )
+      echo "Identity token from github"
+      echo "${identity_token}" | base64
+      if [ ${{ inputs.run_token_exchange }} = true ]; then
+        identity_token=$(
+          curl 'https://sigstore.verify.ibm.com/oauth2/token' \
+            --header 'Content-Type: application/x-www-form-urlencoded' \
+            --data-urlencode 'client_id=sigstore' \
+            --data-urlencode "client_secret=${SIGSTORE_STS_CLIENT_SECRET}" \
+            --data-urlencode 'grant_type=urn:ietf:params:oauth:grant-type:token-exchange' \
+            --data-urlencode "subject_token=${identity_token}" \
+            --data-urlencode 'subject_token_type=GitHubIdentityToken' -s \
+          | jq -r .access_token
+        )
+        echo "Identity token from sigstore.verify.ibm.com"
+        echo "${identity_token}" | base64
+      fi
+      echo "identity-token=$identity_token" >> $GITHUB_OUTPUT
+
+  - name: Show contents of model directory before signature
+    shell: bash
+    if: inputs.debug == true
+    run: |
+      pwd
+      find .
+      find ${{ inputs.model_dir }}
+
+  - name: Sign the artifact
+    shell: bash
+    run: |
+      python -m model_signing \
+       sign sigstore \
+        --identity_token "${{ steps.get-oidc-token.outputs.identity-token }}" \
+        --signature "${{ inputs.model_dir }}/model.sig" \
+        "${{ inputs.model_dir }}"
+
+  - name: Show contents of model directory after signature
+    shell: bash
+    if: inputs.debug == true
+    run: |
+      find ${{ inputs.model_dir }}
