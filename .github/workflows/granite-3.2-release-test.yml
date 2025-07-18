@@ -16,14 +16,15 @@ permissions:
 env:
   DEBUG: true
   TRACE: false
-  ENABLE_LANGUAGE_JOBS: false
+  ENABLE_LANGUAGE_JOBS: true
   ENABLE_VISION_JOBS: false
   ENABLE_GUARDIAN_JOBS: false
-  ENABLE_EMBEDDING_JOBS: true
+  ENABLE_EMBEDDING_JOBS: false
   # 'ibm-granite/granite-3.2-2b-instruct',
   # 'ibm-granite/granite-3.2-8b-instruct'
   SOURCE_LANGUAGE_REPOS: "[
-    'None'
+    'ibm-granite/granite-3.2-2b-instruct',
+    'ibm-granite/granite-3.2-8b-instruct'
   ]"
   # 'Q2_K',
   # 'Q3_K_L', 'Q3_K_M', 'Q3_K_S',
@@ -32,12 +33,7 @@ env:
   # 'Q6_K',
   # 'Q8_0'
   TARGET_LANGUAGE_QUANTIZATIONS: "[
-    'Q2_K',
     'Q3_K_L', 'Q3_K_M', 'Q3_K_S',
-    'Q4_0', 'Q4_1', 'Q4_K_M', 'Q4_K_S',
-    'Q5_0', 'Q5_1', 'Q5_K_M', 'Q5_K_S',
-    'Q6_K',
-    'Q8_0'
   ]"
   # 'ibm-granite/granite-guardian-3.2-3b-a800m',
   # 'ibm-granite/granite-guardian-3.2-5b'
@@ -271,6 +267,27 @@ jobs:
       quantization: "${{ matrix.quantization }}"
     secrets:
       hf_token: ${{ secrets.HF_TOKEN_TEST }}
+
+  language-sign-models-in-repos:
+    needs: [ environment-setup, bvt-language-quantized-gguf-models ]
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        repo_id: ${{ fromJson(needs.environment-setup.outputs.source_language_repos) }}
+    uses: ./.github/workflows/reusable-sign-model-in-hf-repo.yml
+    with:
+      debug: true
+      do_token_exchange: ${{ needs.environment-setup.outputs.target_repo_do_token_exchange == 'true' }}
+      repo_id: ${{ matrix.repo_id }}
+      target_repo_owner: ${{ needs.environment-setup.outputs.target_repo_owner }}
+      target_repo_suffix: "-GGUF"
+    secrets:
+      hf_token: ${{ secrets.HF_TOKEN_TEST }}
+      sigstore_sts_client_secret: ${{ secrets.SIGSTORE_STS_CLIENT_SECRET }}
 
   # TODO: change collection from private to public (on success)
   create-hf-collections:
