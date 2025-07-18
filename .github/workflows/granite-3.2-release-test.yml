@@ -73,7 +73,10 @@ env:
   # 'ibm-granite/granite-embedding-107m-multilingual',
   # 'ibm-granite/granite-embedding-278m-multilingual'
   SOURCE_EMBEDDING_REPOS: "[
-    'ibm-granite/granite-embedding-30m-english'
+    'ibm-granite/granite-embedding-30m-english',
+    'ibm-granite/granite-embedding-125m-english',
+    'ibm-granite/granite-embedding-107m-multilingual',
+    'ibm-granite/granite-embedding-278m-multilingual'
   ]"
   # 'Q4_K_M', 'Q8_0'
   TARGET_EMBEDDING_QUANTIZATIONS: "[
