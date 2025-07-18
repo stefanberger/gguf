@@ -12,6 +12,8 @@ on:
     secrets:
       hf_token:
         required: true
+      sigstore_sts_client_secret:
+        required: true
     inputs:
       enable_language_jobs:
         type: boolean
@@ -39,6 +41,9 @@ on:
         required: true
       target_repo_name_ext:
         type: string
+        required: true
+      target_repo_do_token_exchange:
+        type: boolean
         required: true
       debug:
         type: boolean
@@ -305,3 +310,13 @@ jobs:
         echo "TARGET_REPO_ID=${{env.TARGET_REPO_ID}}"
         echo "LOCAL_FNAME_QUANTIZED_GGUF=${{env.LOCAL_FNAME_QUANTIZED_GGUF}}"
         python ./scripts/hf_model_upload.py ${{ env.TARGET_REPO_ID }} ${{ env.LOCAL_FNAME_QUANTIZED_GGUF }} ${{secrets.hf_token}} ${{github.workflow_ref}} ${{github.run_id}}
+
+    - name: sign-model
+      uses: ./.github/workflows/reusable-sign-models
+      with:
+        debug: true
+        model_file: ${{ env.LOCAL_FNAME_QUANTIZED_GGUF }}
+        sigstore_sts_client_secret: ${{secrets.sigstore_sts_client_secret}}
+        target_repo_id: ${{env.TARGET_REPO_ID}}
+        hf_token: ${{secrets.hf_token}}
+        do_token_exchange: ${{inputs.target_repo_do_token_exchange}}

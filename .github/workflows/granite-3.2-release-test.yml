@@ -235,12 +235,13 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
         repo_id: ${{ fromJson(needs.environment-setup.outputs.source_language_repos) }}
         quantization: ${{ fromJson(needs.environment-setup.outputs.target_language_quantizations) }}
-    uses: IBM/gguf/.github/workflows/reusable-quantize-upload-gguf.yml@main
+    uses: ./.github/workflows/reusable-quantize-upload-gguf.yml
     with:
       debug: ${{ needs.environment-setup.outputs.debug == 'true' }}
       trace: ${{ needs.environment-setup.outputs.trace == 'true' }}
@@ -248,10 +249,12 @@ jobs:
       hf_collection_config: "${{ needs.environment-setup.outputs.hf_collection_config }}"
       target_repo_owner: "${{ needs.environment-setup.outputs.target_repo_owner }}"
       target_repo_name_ext: "${{ needs.environment-setup.outputs.target_repo_name_ext }}"
+      target_repo_do_token_exchange: ${{ needs.environment-setup.outputs.target_repo_do_token_exchange == 'true' }}
       repo_id: "${{ matrix.repo_id }}"
       quantization: "${{ matrix.quantization }}"
     secrets:
       hf_token: ${{ secrets.HF_TOKEN_TEST }}
+      sigstore_sts_client_secret: ${{ secrets.SIGSTORE_STS_CLIENT_SECRET }}
 
   bvt-language-quantized-gguf-models:
     needs: [ environment-setup, quantize-upload-gguf ]
@@ -444,12 +447,13 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
         repo_id: ${{ fromJson(needs.environment-setup.outputs.source_guardian_repos) }}
         quantization: ${{ fromJson(needs.environment-setup.outputs.target_guardian_quantizations) }}
-    uses: IBM/gguf/.github/workflows/reusable-quantize-upload-gguf.yml@main
+    uses: ./.github/workflows/reusable-quantize-upload-gguf.yml
     with:
       debug: ${{ needs.environment-setup.outputs.debug == 'true' }}
       trace: ${{ needs.environment-setup.outputs.trace == 'true' }}
@@ -457,10 +461,12 @@ jobs:
       hf_collection_config: "${{ needs.environment-setup.outputs.hf_collection_config }}"
       target_repo_owner: "${{ needs.environment-setup.outputs.target_repo_owner }}"
       target_repo_name_ext: "${{ needs.environment-setup.outputs.target_repo_name_ext }}"
+      target_repo_do_token_exchange: ${{ needs.environment-setup.outputs.target_repo_do_token_exchange == 'true' }}
       repo_id: "${{ matrix.repo_id }}"
       quantization: "${{ matrix.quantization }}"
     secrets:
       hf_token: ${{ secrets.HF_TOKEN_TEST }}
+      sigstore_sts_client_secret: ${{ secrets.SIGSTORE_STS_CLIENT_SECRET }}
 
   guardian-bvt-quantized-gguf-models:
     needs: [ environment-setup, guardian-quantize-upload-gguf ]
@@ -550,12 +556,13 @@ jobs:
     permissions:
       contents: write
       packages: write
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
         repo_id: ${{ fromJson(needs.environment-setup.outputs.source_embedding_repos) }}
         quantization: ${{ fromJson(needs.environment-setup.outputs.target_embedding_quantizations) }}
-    uses: IBM/gguf/.github/workflows/reusable-quantize-upload-gguf.yml@main
+    uses: ./.github/workflows/reusable-quantize-upload-gguf.yml
     with:
       debug: ${{ needs.environment-setup.outputs.debug == 'true' }}
       trace: ${{ needs.environment-setup.outputs.trace == 'true' }}
@@ -563,10 +570,12 @@ jobs:
       hf_collection_config: "${{ needs.environment-setup.outputs.hf_collection_config }}"
       target_repo_owner: "${{ needs.environment-setup.outputs.target_repo_owner }}"
       target_repo_name_ext: "${{ needs.environment-setup.outputs.target_repo_name_ext }}"
+      target_repo_do_token_exchange: ${{ needs.environment-setup.outputs.target_repo_do_token_exchange == 'true' }}
       repo_id: "${{ matrix.repo_id }}"
       quantization: "${{ matrix.quantization }}"
     secrets:
       hf_token: ${{ secrets.HF_TOKEN_TEST }}
+      sigstore_sts_client_secret: ${{ secrets.SIGSTORE_STS_CLIENT_SECRET }}
 
   # embedding-bvt-quantized-gguf-models:
   #   needs: [ environment-setup, embedding-quantize-upload-gguf ]
