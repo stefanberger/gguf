@@ -56,7 +56,6 @@ jobs:
         pip install model_signing
         pip install -r ./requirements.txt
         sudo apt-get -y update
-        sudo apt-get -y install git git-lfs
 
     - name: Free disk space
       if: ${{ inputs.free_disk_space }}
@@ -114,20 +113,21 @@ jobs:
         fi
         echo "identity-token=$identity_token" >> $GITHUB_OUTPUT
 
-    - name: Clone huggingface repo and sign
+    - name: Download huggingface repo and sign
       run: |
         repo_id=${{ inputs.repo_id }}
         repo_id=${repo_id#*/}
-        target_repo_id=${{ inputs.target_repo_owner}}/${repo_id}${{ inputs.target_repo_suffix }}
-        git clone https://huggingface.co/${target_repo_id}
-        cd ${target_repo_id#*/}
+        target_repo=${repo_id}${{ inputs.target_repo_suffix }}
+        target_repo_id=${{ inputs.target_repo_owner}}/${target_repo}
+        #git clone https://huggingface.co/${target_repo_id}
+        python ./scripts/hf_model_download_snapshot.py \
+          . ${{inputs.target_repo_owner}} ${target_repo} ${{secrets.hf_token}} '*'
+        cd ${target_repo_id}
         rm -fr model.sig
         python -m model_signing sign sigstore \
           --identity_token "${{ steps.get-oidc-token.outputs.identity-token }}" \
           --signature model.sig \
-          --ignore-git-paths \
-          --ignore-paths ${PWD}/.git \
-          --ignore-paths ${PWD}/.gitattributes \
+          --ignore-paths ${PWD}/.cache \
           "${PWD}"
         echo "LOCAL_FNAME_MODEL_SIG=${PWD}/model.sig" >> $GITHUB_ENV
         echo "TARGET_REPO_ID=${target_repo_id}" >> $GITHUB_ENV
