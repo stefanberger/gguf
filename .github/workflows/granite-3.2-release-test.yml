@@ -341,10 +341,11 @@ jobs:
 
   quantize-vision-llm-and-upload-gguf:
     needs: [ environment-setup, convert-hf-llava-to-f16-gguf ]
-    uses: IBM/gguf/.github/workflows/reusable-quantize-llava-upload-gguf.yml@main
+    uses: ./.github/workflows/reusable-quantize-llava-upload-gguf.yml
     permissions:
       contents: write
       packages: write
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -357,10 +358,12 @@ jobs:
       hf_collection_config: "${{ needs.environment-setup.outputs.hf_collection_config }}"
       target_repo_owner: "${{ needs.environment-setup.outputs.target_repo_owner }}"
       target_repo_name_ext: "${{ needs.environment-setup.outputs.target_repo_name_ext }}"
+      target_repo_do_token_exchange: ${{ needs.environment-setup.outputs.target_repo_do_token_exchange == 'true' }}
       repo_id: "${{ matrix.repo_id }}"
       quantization: "${{ matrix.quantization }}"
     secrets:
       hf_token: ${{ secrets.HF_TOKEN_TEST }}
+      sigstore_sts_client_secret: ${{ secrets.SIGSTORE_STS_CLIENT_SECRET }}
 
   bvt-vision-quantized-gguf-models:
     needs: [ environment-setup, quantize-vision-llm-and-upload-gguf ]
