@@ -316,10 +316,11 @@ jobs:
 
   convert-hf-llava-to-f16-gguf:
     needs: [ environment-setup, vision-create-hf-repos ]
-    uses: IBM/gguf/.github/workflows/reusable-convert-hf-llava-to-f16-gguf.yml@main
+    uses: ./.github/workflows/reusable-convert-hf-llava-to-f16-gguf.yml
     permissions:
       contents: write
       packages: write
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -331,10 +332,12 @@ jobs:
       hf_collection_config: ${{ needs.environment-setup.outputs.hf_collection_config }}
       target_repo_owner: ${{ needs.environment-setup.outputs.target_repo_owner }}
       target_repo_name_ext: ${{ needs.environment-setup.outputs.target_repo_name_ext }}
+      target_repo_do_token_exchange: ${{ needs.environment-setup.outputs.target_repo_do_token_exchange == 'true' }}
       repo_id: ${{ matrix.repo_id }}
     secrets:
       hf_token: ${{ secrets.HF_TOKEN_TEST }}
       ibm_granite_token: ${{ secrets.HF_TOKEN_IBM_GRANITE }}
+      sigstore_sts_client_secret: ${{ secrets.SIGSTORE_STS_CLIENT_SECRET }}
 
   quantize-vision-llm-and-upload-gguf:
     needs: [ environment-setup, convert-hf-llava-to-f16-gguf ]
