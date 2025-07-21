@@ -241,7 +241,7 @@ jobs:
       matrix:
         repo_id: ${{ fromJson(needs.environment-setup.outputs.source_language_repos) }}
         quantization: ${{ fromJson(needs.environment-setup.outputs.target_language_quantizations) }}
-    uses: IBM/gguf/.github/workflows/reusable-quantize-upload-gguf.yml@main
+    uses: ./.github/workflows/reusable-quantize-upload-gguf.yml
     with:
       debug: ${{ needs.environment-setup.outputs.debug == 'true' }}
       trace: ${{ needs.environment-setup.outputs.trace == 'true' }}
@@ -288,7 +288,7 @@ jobs:
         quantization:
           - f16
           - ${{ fromJson(needs.environment-setup.outputs.target_language_quantizations) }}
-    uses: IBM/gguf/.github/workflows/reusable-sign-model-in-hf-repo.yml@main
+    uses: ./.github/workflows/reusable-sign-model-in-hf-repo.yml
     with:
       debug: ${{ needs.environment-setup.outputs.debug == 'true' }}
       do_token_exchange: ${{ needs.environment-setup.outputs.target_repo_do_token_exchange == 'true' }}
@@ -360,7 +360,7 @@ jobs:
 
   quantize-vision-llm-and-upload-gguf:
     needs: [ environment-setup, convert-hf-llava-to-f16-gguf ]
-    uses: IBM/gguf/.github/workflows/reusable-quantize-llava-upload-gguf.yml@main
+    uses: ./.github/workflows/reusable-quantize-llava-upload-gguf.yml
     permissions:
       contents: write
       packages: write
@@ -416,7 +416,7 @@ jobs:
           - f16
           - ${{ fromJson(needs.environment-setup.outputs.target_vision_quantizations) }}
           - "fullname:mmproj-model-f16.gguf"
-    uses: IBM/gguf/.github/workflows/reusable-sign-model-in-hf-repo.yml@main
+    uses: ./.github/workflows/reusable-sign-model-in-hf-repo.yml
     with:
       debug: ${{ needs.environment-setup.outputs.debug == 'true' }}
       do_token_exchange: ${{ needs.environment-setup.outputs.target_repo_do_token_exchange == 'true' }}
@@ -496,7 +496,7 @@ jobs:
       matrix:
         repo_id: ${{ fromJson(needs.environment-setup.outputs.source_guardian_repos) }}
         quantization: ${{ fromJson(needs.environment-setup.outputs.target_guardian_quantizations) }}
-    uses: IBM/gguf/.github/workflows/reusable-quantize-upload-gguf.yml@main
+    uses: ./.github/workflows/reusable-quantize-upload-gguf.yml
     with:
       debug: ${{ needs.environment-setup.outputs.debug == 'true' }}
       trace: ${{ needs.environment-setup.outputs.trace == 'true' }}
@@ -543,7 +543,7 @@ jobs:
         quantization:
           - f16
           - ${{ fromJson(needs.environment-setup.outputs.target_guardian_quantizations) }}
-    uses: IBM/gguf/.github/workflows/reusable-sign-model-in-hf-repo.yml@main
+    uses: ./.github/workflows/reusable-sign-model-in-hf-repo.yml
     with:
       debug: ${{ needs.environment-setup.outputs.debug == 'true' }}
       do_token_exchange: ${{ needs.environment-setup.outputs.target_repo_do_token_exchange == 'true' }}
@@ -623,7 +623,7 @@ jobs:
       matrix:
         repo_id: ${{ fromJson(needs.environment-setup.outputs.source_embedding_repos) }}
         quantization: ${{ fromJson(needs.environment-setup.outputs.target_embedding_quantizations) }}
-    uses: IBM/gguf/.github/workflows/reusable-quantize-upload-gguf.yml@main
+    uses: ./.github/workflows/reusable-quantize-upload-gguf.yml
     with:
       debug: ${{ needs.environment-setup.outputs.debug == 'true' }}
       trace: ${{ needs.environment-setup.outputs.trace == 'true' }}
@@ -689,7 +689,7 @@ jobs:
         quantization:
           - f16
           - ${{ fromJson(needs.environment-setup.outputs.target_embedding_quantizations) }}
-    uses: IBM/gguf/.github/workflows/reusable-sign-model-in-hf-repo.yml@main
+    uses: ./.github/workflows/reusable-sign-model-in-hf-repo.yml
     with:
       debug: ${{ needs.environment-setup.outputs.debug == 'true' }}
       do_token_exchange: ${{ needs.environment-setup.outputs.target_repo_do_token_exchange == 'true' }}
